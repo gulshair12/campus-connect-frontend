@@ -13,7 +13,12 @@ const navLinks = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#3478F6] px-6 py-4">
+    <header
+      className="sticky top-0 z-50 w-full px-6 py-4"
+      style={{
+        background: 'linear-gradient(90deg, #427CC9 0%, #3A74C5 100%)',
+      }}
+    >
       <nav className="mx-auto flex max-w-7xl items-center justify-between">
         <Link
           href="/"

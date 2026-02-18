@@ -15,13 +15,21 @@ const socialLinks = [
   { icon: Twitter, href: "#", label: "Twitter" },
 ];
 
+function ColumnHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="inline-block border-b-2 border-white/80 pb-2 pr-2 font-bold">
+      {children}
+    </h3>
+  );
+}
+
 export function Footer() {
   return (
-    <footer className="bg-[#2A6AD4] px-6 py-12 text-white">
-      <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-12">
-        <div>
-          <h3 className="mb-4 font-bold">Quick Links</h3>
-          <ul className="space-y-2">
+    <footer className="bg-[#2C5AE7] px-6 py-12 text-white">
+      <div className="mx-auto flex max-w-7xl flex-col items-stretch gap-12 lg:flex-row lg:justify-between">
+        <div className="flex-1 lg:min-w-0">
+          <ColumnHeading>Quick Links</ColumnHeading>
+          <ul className="mt-4 space-y-3">
             {quickLinks.map((link) => (
               <li key={link.href}>
                 <Link
@@ -34,25 +42,25 @@ export function Footer() {
             ))}
           </ul>
         </div>
-        <div>
-          <h3 className="mb-4 font-bold">Contact Us</h3>
+        <div className="flex-1 lg:border-l lg:border-white/50 lg:pl-12 lg:min-w-0">
+          <ColumnHeading>Contact Us</ColumnHeading>
           <a
             href="mailto:info@campusconnect.com"
-            className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
+            className="mt-4 flex items-center gap-2 text-white/90 transition-colors hover:text-white"
           >
-            <Mail className="h-5 w-5" />
+            <Mail className="h-5 w-5 shrink-0" />
             info@campusconnect.com
           </a>
         </div>
-        <div>
-          <h3 className="mb-4 font-bold">Follow Us</h3>
-          <div className="flex gap-3">
+        <div className="flex-1 lg:border-l lg:border-white/50 lg:pl-12 lg:min-w-0">
+          <ColumnHeading>Follow Us</ColumnHeading>
+          <div className="mt-4 flex gap-3">
             {socialLinks.map(({ icon: Icon, href, label }) => (
               <a
                 key={label}
                 href={href}
                 aria-label={label}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1a5ab8] text-white transition-colors hover:bg-[#3478F6]"
+                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/80 bg-[#1a5ab8] text-white transition-colors hover:bg-[#3478F6]"
               >
                 <Icon className="h-5 w-5" />
               </a>
@@ -60,7 +68,8 @@ export function Footer() {
           </div>
         </div>
       </div>
-      <p className="mt-12 text-center text-sm text-white/80">
+      <div className="mx-auto mt-12 border-t border-white/50" />
+      <p className="mt-6 text-center text-sm text-white/80">
         © 2024 Campus Connect. All rights reserved.
       </p>
     </footer>
