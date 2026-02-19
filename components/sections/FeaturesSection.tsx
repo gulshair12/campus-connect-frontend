@@ -32,7 +32,7 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map(({ icon, title, description }) => (
-            <Card key={title} className="flex flex-col items-start">
+            <Card key={title} className="flex flex-col items-start p-6">
               <div className="flex w-full items-center gap-3 border-b border-gray-200 pb-3">
                 <div className="flex shrink-0 items-center justify-center">
                   <Image src={icon} alt={title} width={30} height={30} />

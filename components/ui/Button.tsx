@@ -1,3 +1,5 @@
+"use client";
+
 import { forwardRef } from "react";
 
 export interface ButtonProps
@@ -37,6 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={`
           font-semibold transition-colors duration-200
           disabled:opacity-50 disabled:cursor-not-allowed
+          cursor-pointer
           ${variantStyles[variant]}
           ${sizeStyles[size]}
           ${fullWidth ? "w-full" : ""}

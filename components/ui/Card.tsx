@@ -1,3 +1,5 @@
+"use client";
+
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
@@ -5,7 +7,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Card({ className = "", children, ...props }: CardProps) {
   return (
     <div
-      className={`rounded-2xl bg-white p-6 shadow-md ${className}`}
+      className={`rounded-2xl shadow-md ${className}`}
       {...props}
     >
       {children}
