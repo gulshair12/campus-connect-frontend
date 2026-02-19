@@ -30,7 +30,7 @@ export function HeroSection() {
         </p>
         <div className="mt-8">
           <Link href="/register">
-            <Button variant="secondary" size="lg">
+            <Button variant="secondary" className="px-16 py-2 text-xl">
               Join
             </Button>
           </Link>
