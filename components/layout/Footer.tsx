@@ -17,7 +17,7 @@ const socialLinks = [
 
 function ColumnHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="inline-block border-b-2 border-white/80 pb-2 pr-2 font-bold">
+    <h3 className="inline-block border-b-1 border-white/80 pb-2 pr-2 font-bold">
       {children}
     </h3>
   );
@@ -25,7 +25,7 @@ function ColumnHeading({ children }: { children: React.ReactNode }) {
 
 export function Footer() {
   return (
-    <footer className="bg-[#2C5AE7] px-6 py-12 text-white">
+    <footer className="bg-[#2C5AE7] px-6 pt-12 pb-4 text-white">
       <div className="mx-auto flex max-w-7xl flex-col items-stretch gap-12 lg:flex-row lg:justify-between">
         <div className="flex-1 lg:min-w-0">
           <ColumnHeading>Quick Links</ColumnHeading>
@@ -69,7 +69,7 @@ export function Footer() {
         </div>
       </div>
       <div className="mx-auto mt-12 border-t border-white/50" />
-      <p className="mt-6 text-center text-sm text-white/80">
+      <p className="mt-4 text-center text-sm text-white/80">
         © 2024 Campus Connect. All rights reserved.
       </p>
     </footer>
