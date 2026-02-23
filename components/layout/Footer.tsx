@@ -4,9 +4,10 @@ import Link from "next/link";
 import { Mail, Facebook, Instagram, Twitter } from "lucide-react";
 
 const quickLinks = [
-  { href: "/#resources", label: "Resources" },
-  { href: "/#events", label: "Events" },
-  { href: "/#buddy", label: "Buddy System" },
+  { href: "/about", label: "About Us" },
+  { href: "/resources", label: "Resources" },
+  { href: "/events", label: "Events" },
+  { href: "/buddy-system", label: "Buddy System" },
 ];
 
 const socialLinks = [

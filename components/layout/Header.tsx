@@ -1,16 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Avatar } from "@/components/ui/Avatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/#about", label: "About Us" },
-  { href: "/#events", label: "Events" },
-  { href: "/#resources", label: "Resources" },
-  { href: "/#buddy", label: "Buddy System" },
+  { href: "/about", label: "About Us" },
+  { href: "/events", label: "Events" },
+  { href: "/resources", label: "Resources" },
+  { href: "/buddy-system", label: "Buddy System" },
 ];
 
 function handleLogout() {
@@ -19,8 +21,18 @@ function handleLogout() {
 }
 
 export function Header() {
+  const [mounted, setMounted] = useState(false);
   const { data: user, isLoading } = useCurrentUser();
   const isLoggedIn = !!user?.fullName;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Until mounted, render the same as server (login link) to avoid hydration mismatch.
+  // On server, useCurrentUser has no token so it never "loads"; on client with token
+  // it shows Loading. Defer auth-dependent UI until after hydration.
+  const showAuthUI = mounted;
 
   return (
     <header
@@ -47,11 +59,24 @@ export function Header() {
             </Link>
           ))}
           <div className="flex items-center gap-2 sm:gap-3">
-            {isLoggedIn ? (
+            {!showAuthUI ? (
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Log In
+                </Button>
+              </Link>
+            ) : isLoggedIn ? (
               <>
-                <span className="text-white font-medium">
-                  {user?.fullName}
-                </span>
+                <div className="flex items-center gap-2">
+                  <Avatar
+                    name={user?.fullName ?? ""}
+                    size="sm"
+                    variant="cartoon"
+                  />
+                  <span className="text-white font-medium">
+                    {user?.fullName}
+                  </span>
+                </div>
                 <Button
                   variant="outline"
                   size="sm"

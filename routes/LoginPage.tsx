@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { Mail, KeyRound, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
@@ -37,58 +36,52 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#2A6AD4] p-4">
-      <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="hidden w-[45%] bg-[#D2DBF0] lg:flex lg:items-center lg:justify-center">
-          <div className="flex h-48 w-48 items-center justify-center rounded-full bg-[#2A6AD4]/20">
-            <LogIn className="h-32 w-32 text-[#2A6AD4]" strokeWidth={1.5} />
-          </div>
-        </div>
-        <div className="flex w-full flex-col justify-center bg-white px-8 py-12 lg:w-[55%] lg:px-16">
-          <div className="mx-auto w-full max-w-md">
-            <h1 className="text-3xl font-bold text-[#2A6AD4]">Login</h1>
-            <p className="mt-2 text-gray-500">
-              Hey enter your details to sign in to your account
-            </p>
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-              <Input
-                placeholder="Enter your email"
-                type="email"
-                icon={<Mail className="h-5 w-5 text-gray-400" />}
-                error={errors.email?.message}
-                {...register("email")}
-              />
-              <Input
-                placeholder="Enter your password"
-                type="password"
-                icon={<KeyRound className="h-5 w-5 text-gray-400" />}
-                error={errors.password?.message}
-                {...register("password")}
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                fullWidth
-                disabled={isSubmitting || loginMutation.isPending}
-              >
-                Login
-              </Button>
-            </form>
-            <p className="mt-6 text-center text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className="font-semibold text-[#3478F6] hover:underline">
-                Sign Up
-              </Link>
-            </p>
-            <Link
-              href="/"
-              className="mt-4 block text-center text-sm text-gray-500 hover:text-gray-700"
+    <div
+      className="flex min-h-screen items-center justify-center px-4 py-12"
+      style={{ background: "linear-gradient(90deg, #427CC9 0%, #3A74C5 100%)" }}
+    >
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl border-0 bg-white p-8 shadow-2xl">
+          <h1 className="text-2xl font-bold text-gray-900">Log in</h1>
+          <p className="mt-1 text-gray-500">
+            Enter your details to sign in to your account
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+            <Input
+              placeholder="Email address"
+              type="email"
+              error={errors.email?.message}
+              {...register("email")}
+            />
+            <Input
+              placeholder="Password"
+              type="password"
+              error={errors.password?.message}
+              {...register("password")}
+            />
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              disabled={isSubmitting || loginMutation.isPending}
             >
-              ← Back to Home
+              Log in
+            </Button>
+          </form>
+          <p className="mt-6 text-center text-sm text-gray-600">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-semibold text-[#3478F6] hover:underline">
+              Sign up
             </Link>
-          </div>
+          </p>
         </div>
+        <Link
+          href="/"
+          className="mt-6 block text-center text-sm text-white/90 hover:text-white"
+        >
+          ← Back to Home
+        </Link>
       </div>
     </div>
   );
