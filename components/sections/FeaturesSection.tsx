@@ -37,7 +37,7 @@ export function FeaturesSection() {
                 <div className="flex shrink-0 items-center justify-center">
                   <Image src={icon} alt={title} width={30} height={30} />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+                <h3 className="text-lg font-bold text-[#1e3a5f]">{title}</h3>
               </div>
               <p className="mt-3 text-gray-600">{description}</p>
             </Card>
