@@ -23,9 +23,14 @@ export function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await loginMutation.mutateAsync(data);
+      const result = await loginMutation.mutateAsync(data);
       toast.success("Login successful!");
-      router.push("/");
+      const role = result?.user?.role ?? (typeof window !== "undefined" ? localStorage.getItem("role") : null);
+      if (role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/");
+      }
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err

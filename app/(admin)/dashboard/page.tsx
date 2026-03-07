@@ -1,9 +1,5 @@
-import React from 'react'
+import { AdminDashboardPage } from "@/routes/AdminDashboardPage";
 
-const page = () => {
-  return (
-    <div>Dashboard Page</div>
-  )
+export default function Dashboard() {
+  return <AdminDashboardPage />;
 }
-
-export default page

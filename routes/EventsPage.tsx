@@ -1,46 +1,20 @@
 "use client";
 
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { EventCard } from "@/components/cards/EventCard";
 import { DateFilter } from "@/components/filters/DateFilter";
 import { EventsEmptyState } from "@/components/sections/events/EventsEmptyState";
+import { getEventsByFilter, type EventFilter } from "@/services/eventService";
 
-const DUMMY_EVENTS = [
-  {
-    id: "1",
-    title: "Orientation Workshop",
-    description: "Introduction for new international students. Learn about campus resources and meet your peers.",
-    date: "May 15",
-    location: "Main Hall, Building A",
-    image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400",
-  },
-  {
-    id: "2",
-    title: "Cultural Festival",
-    description: "Celebrate diversity with food, music, and performances from around the world.",
-    date: "May 20",
-    location: "Student Center",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400",
-  },
-  {
-    id: "3",
-    title: "Career Fair",
-    description: "Connect with employers and explore internship opportunities.",
-    date: "May 25",
-    location: "Convention Center",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400",
-  },
-  {
-    id: "4",
-    title: "Study Skills Workshop",
-    description: "Tips and strategies for academic success in your new environment.",
-    date: "Jun 2",
-    location: "Library Room 101",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400",
-  },
-];
+const DEFAULT_FILTER: EventFilter = "7days";
 
 export function EventsPage() {
-  const events = DUMMY_EVENTS;
+  const [filter, setFilter] = useState<EventFilter>(DEFAULT_FILTER);
+  const { data: events = [], isLoading, isError } = useQuery({
+    queryKey: ["events", filter],
+    queryFn: () => getEventsByFilter(filter),
+  });
 
   return (
     <section className="bg-gray-50 px-6 py-16">
@@ -55,23 +29,51 @@ export function EventsPage() {
         </div>
 
         <div className="mb-8">
-          <DateFilter />
+          <DateFilter value={filter} onChange={setFilter} />
         </div>
 
-        {events.length > 0 ? (
+        {isLoading && (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl bg-white shadow-sm"
+              >
+                <div className="h-48 animate-pulse bg-gray-200" />
+                <div className="space-y-3 p-6">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200" />
+                  <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && isError && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center">
+            <p className="text-red-700">
+              Unable to load events. Please try again later.
+            </p>
+          </div>
+        )}
+
+        {!isLoading && !isError && events.length > 0 && (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
               <EventCard
                 key={event.id}
-                title={event.title}
+                title={event.heading}
                 description={event.description}
                 date={event.date}
                 location={event.location}
-                imagePlaceholder={event.image}
+                imagePlaceholder={event.image ?? undefined}
               />
             ))}
           </div>
-        ) : (
+        )}
+
+        {!isLoading && !isError && events.length === 0 && (
           <EventsEmptyState />
         )}
       </div>

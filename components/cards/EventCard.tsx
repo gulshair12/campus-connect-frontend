@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
+import { formatEventDate } from "@/lib/formatDate";
 
 export interface EventCardProps {
   title: string;
@@ -17,6 +18,11 @@ export function EventCard({
   location,
   imagePlaceholder = "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400",
 }: EventCardProps) {
+  const displayDate = date?.includes("T") ? formatEventDate(date) : date;
+  const badgeParts = displayDate.split(" ");
+  const badgeMonth = badgeParts[0] ?? "";
+  const badgeDay = badgeParts[1]?.replace(/,/g, "") ?? displayDate;
+
   return (
     <Card className="overflow-hidden bg-white p-0">
       <div className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-200">
@@ -27,10 +33,10 @@ export function EventCard({
         />
         <div className="absolute left-4 top-4 flex flex-col rounded-lg bg-[#3478F6] px-3 py-2 text-center">
           <span className="text-xs font-medium text-white">
-            {date.split(" ")[0]}
+            {badgeMonth}
           </span>
           <span className="text-xl font-bold text-white">
-            {date.split(" ")[1] || date}
+            {badgeDay}
           </span>
         </div>
       </div>
@@ -38,7 +44,7 @@ export function EventCard({
         <h3 className="text-lg font-bold text-[#1e3a5f]">{title}</h3>
         <p className="mt-2 text-sm text-gray-600">{description}</p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm text-gray-500">
-          <span>{date}</span>
+          <span>{displayDate}</span>
           <span>•</span>
           <span>{location}</span>
         </div>

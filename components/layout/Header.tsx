@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -15,23 +14,42 @@ const navLinks = [
   { href: "/buddy-system", label: "Buddy System" },
 ];
 
+function getStoredUser(): { fullName?: string; email?: string } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem("user");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { fullName?: string; email?: string };
+    return parsed && typeof parsed.fullName === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 function handleLogout() {
+  if (typeof window === "undefined") return;
   localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("user");
   window.location.reload();
 }
 
 export function Header() {
   const [mounted, setMounted] = useState(false);
-  const { data: user, isLoading } = useCurrentUser();
-  const isLoggedIn = !!user?.fullName;
+  const [user, setUser] = useState<{ fullName?: string; email?: string } | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Until mounted, render the same as server (login link) to avoid hydration mismatch.
-  // On server, useCurrentUser has no token so it never "loads"; on client with token
-  // it shows Loading. Defer auth-dependent UI until after hydration.
+  useEffect(() => {
+    if (!mounted) return;
+    setUser(getStoredUser());
+    setRole(typeof window !== "undefined" ? localStorage.getItem("role") : null);
+  }, [mounted]);
+
+  const isLoggedIn = !!user?.fullName;
   const showAuthUI = mounted;
 
   return (
@@ -73,9 +91,23 @@ export function Header() {
                     size="sm"
                     variant="cartoon"
                   />
-                  <span className="text-white font-medium">
-                    {user?.fullName}
-                  </span>
+                  <div className="flex flex-col items-start">
+                    <span className="flex items-center gap-1.5 text-white font-medium">
+                      {user?.fullName}
+                      {role === "admin" && (
+                        <Link
+                          href="/dashboard"
+                          className="inline-flex items-center gap-0.5 rounded bg-white/20 px-1.5 py-0.5 text-xs font-medium text-white hover:bg-white/30"
+                        >
+                          <Shield className="h-3 w-3" />
+                          Admin
+                        </Link>
+                      )}
+                    </span>
+                    {user?.email && (
+                      <span className="text-xs text-white/80">{user.email}</span>
+                    )}
+                  </div>
                 </div>
                 <Button
                   variant="outline"
@@ -87,8 +119,6 @@ export function Header() {
                   Logout
                 </Button>
               </>
-            ) : isLoading ? (
-              <span className="text-white/70 text-sm">Loading...</span>
             ) : (
               <Link href="/login">
                 <Button variant="outline" size="sm">

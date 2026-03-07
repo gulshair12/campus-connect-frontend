@@ -9,7 +9,7 @@ export function EventsEmptyState() {
         <Calendar className="h-8 w-8" />
       </div>
       <h3 className="mt-4 text-lg font-semibold text-gray-700">
-        No events at the moment
+        No upcoming events available.
       </h3>
       <p className="mt-2 max-w-sm text-gray-500">
         Check back later for upcoming campus events, workshops, and social
