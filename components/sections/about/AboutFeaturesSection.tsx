@@ -44,7 +44,7 @@ export function AboutFeaturesSection() {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#3478F6]/10 text-[#3478F6]">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+                <h3 className="text-lg font-bold text-[#1e3a5f]">{title}</h3>
               </div>
               <p className="mt-3 text-gray-600">{description}</p>
             </Card>

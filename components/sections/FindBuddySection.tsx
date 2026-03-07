@@ -9,7 +9,7 @@ export function FindBuddySection() {
     <section id="buddy" className="bg-white px-6 py-16">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 lg:flex-row justify-center ">
         <div className="flex max-w-xl flex-col items-center text-center">
-          <h2 className="text-3xl font-bold text-primary md:text-4xl">
+          <h2 className="text-3xl font-bold text-[#1e3a5f] md:text-4xl">
             Find a Buddy
           </h2>
           <p className="mt-4 text-lg text-gray-600 border-t border-gray-200 pt-4 ">
