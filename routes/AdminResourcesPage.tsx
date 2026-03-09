@@ -44,6 +44,7 @@ export function AdminResourcesPage() {
         queryClient.invalidateQueries({ queryKey: ["resources"] });
         toast.success("Resource updated.");
         setEditingResource(null);
+        setShowForm(false);
       } else {
         await createResource(
           {

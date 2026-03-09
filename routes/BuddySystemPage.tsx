@@ -1,60 +1,123 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { BuddyCard } from "@/components/cards/BuddyCard";
 import { BuddyFilter } from "@/components/filters/BuddyFilter";
-
-const DUMMY_STUDENTS = [
-  {
-    id: "1",
-    fullName: "Alex Johnson",
-    university: "State University",
-    department: "Computer Science",
-    bioPreview:
-      "Third-year CS student. Happy to help with coding, campus navigation, and finding the best coffee spots.",
-  },
-  {
-    id: "2",
-    fullName: "Maria Garcia",
-    university: "State University",
-    department: "Engineering",
-    bioPreview:
-      "Graduate student in Mechanical Engineering. Love showing new students around the labs and study areas.",
-  },
-  {
-    id: "3",
-    fullName: "James Chen",
-    university: "State University",
-    department: "Business",
-    bioPreview:
-      "MBA student. Can help with career advice, networking, and understanding the business school culture.",
-  },
-  {
-    id: "4",
-    fullName: "Sofia Patel",
-    university: "State University",
-    department: "Arts & Humanities",
-    bioPreview:
-      "Art history major. Happy to share tips on campus life, cultural events, and settling in.",
-  },
-  {
-    id: "5",
-    fullName: "David Kim",
-    university: "State University",
-    department: "Computer Science",
-    bioPreview:
-      "Senior CS student. Experienced with internships and research. Happy to mentor newcomers.",
-  },
-  {
-    id: "6",
-    fullName: "Emma Wilson",
-    university: "State University",
-    department: "Natural Sciences",
-    bioPreview:
-      "Biology PhD student. Can help with lab work, research opportunities, and academic writing.",
-  },
-];
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import {
+  getUsersWithStatus,
+  getOnlineUsers,
+  sendRequest,
+  acceptRequest,
+  rejectRequest,
+  cancelRequest,
+  type BuddyUser,
+} from "@/services/buddyService";
+import { connectSocket, disconnectSocket } from "@/services/socket";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useChat } from "@/hooks/useChat";
 
 export function BuddySystemPage() {
+  const queryClient = useQueryClient();
+  const [selectedFriend, setSelectedFriend] = useState<BuddyUser | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: currentUser } = useCurrentUser();
+  const currentUserId = currentUser?.id;
+
+  const {
+    data: users = [],
+    isLoading: isLoadingUsers,
+    isError: isUsersError,
+  } = useQuery({
+    queryKey: ["buddy", "users"],
+    queryFn: getUsersWithStatus,
+  });
+
+  const { data: onlineUserIds = [] } = useQuery({
+    queryKey: ["buddy", "online"],
+    queryFn: getOnlineUsers,
+  });
+
+  const invalidateBuddy = () => {
+    queryClient.invalidateQueries({ queryKey: ["buddy", "users"] });
+  };
+
+  const sendRequestMutation = useMutation({
+    mutationFn: sendRequest,
+    onSuccess: () => {
+      toast.success("Request sent");
+      invalidateBuddy();
+    },
+    onError: () => {
+      toast.error("Failed to send request");
+    },
+  });
+
+  const acceptRequestMutation = useMutation({
+    mutationFn: acceptRequest,
+    onSuccess: () => {
+      toast.success("Request accepted");
+      invalidateBuddy();
+    },
+    onError: () => {
+      toast.error("Failed to accept request");
+    },
+  });
+
+  const rejectRequestMutation = useMutation({
+    mutationFn: rejectRequest,
+    onSuccess: () => {
+      toast.success("Request rejected");
+      invalidateBuddy();
+    },
+    onError: () => {
+      toast.error("Failed to reject request");
+    },
+  });
+
+  const cancelRequestMutation = useMutation({
+    mutationFn: cancelRequest,
+    onSuccess: () => {
+      toast.success("Request cancelled");
+      invalidateBuddy();
+    },
+    onError: () => {
+      toast.error("Failed to cancel request");
+    },
+  });
+
+  const { messages, isLoading: isLoadingChat, error: chatError, sendMessage } = useChat({
+    friendId: selectedFriend?.id ?? null,
+    currentUserId,
+    enabled: !!selectedFriend && !!currentUserId,
+  });
+
+  // Connect socket when user is logged in
+  useEffect(() => {
+    if (currentUserId) {
+      connectSocket(currentUserId);
+    }
+    return () => {
+      disconnectSocket();
+    };
+  }, [currentUserId]);
+
+  const filteredUsers = users.filter(
+    (u) =>
+      !searchQuery.trim() ||
+      u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.university.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const isPending =
+    sendRequestMutation.isPending ||
+    acceptRequestMutation.isPending ||
+    rejectRequestMutation.isPending ||
+    cancelRequestMutation.isPending;
+
   return (
     <section className="bg-gray-50 px-6 py-16">
       <div className="mx-auto max-w-7xl">
@@ -69,21 +132,82 @@ export function BuddySystemPage() {
         </div>
 
         <div className="mb-8">
-          <BuddyFilter />
+          <BuddyFilter value={searchQuery} onChange={setSearchQuery} />
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {DUMMY_STUDENTS.map((student) => (
-            <BuddyCard
-              key={student.id}
-              fullName={student.fullName}
-              university={student.university}
-              department={student.department}
-              bioPreview={student.bioPreview}
-            />
-          ))}
-        </div>
+        {isLoadingUsers && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm"
+              >
+                <div className="flex gap-4">
+                  <div className="h-16 w-16 animate-pulse rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+                    <div className="mt-4 h-9 w-24 animate-pulse rounded-lg bg-gray-200" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoadingUsers && isUsersError && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center">
+            <p className="text-red-700">
+              Unable to load students. Please try again later.
+            </p>
+          </div>
+        )}
+
+        {!isLoadingUsers && !isUsersError && filteredUsers.length === 0 && (
+          <div className="rounded-2xl border border-gray-200 bg-white px-6 py-12 text-center">
+            <p className="text-gray-600">
+              No students available to connect.
+            </p>
+          </div>
+        )}
+
+        {!isLoadingUsers && !isUsersError && filteredUsers.length > 0 && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredUsers.map((user) => (
+              <BuddyCard
+                key={user.id}
+                id={user.id}
+                fullName={user.fullName}
+                university={user.university}
+                department={user.department}
+                imageUrl={user.imageUrl}
+                connectionStatus={user.connectionStatus}
+                isOnline={onlineUserIds.includes(user.id)}
+                onConnect={() => sendRequestMutation.mutate(user.id)}
+                onCancel={() => cancelRequestMutation.mutate(user.id)}
+                onAccept={() => acceptRequestMutation.mutate(user.id)}
+                onReject={() => rejectRequestMutation.mutate(user.id)}
+                onChat={() => setSelectedFriend(user)}
+                isPending={isPending}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      {selectedFriend && (
+        <ChatWindow
+          friend={selectedFriend}
+          messages={messages}
+          isLoading={isLoadingChat}
+          error={chatError}
+          isFriendOnline={onlineUserIds.includes(selectedFriend.id)}
+          onClose={() => setSelectedFriend(null)}
+          onSend={sendMessage}
+          currentUserId={currentUserId ?? ""}
+        />
+      )}
     </section>
   );
 }

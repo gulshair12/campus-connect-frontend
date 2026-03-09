@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
 export interface CurrentUser {
+  id: string;
   fullName: string;
   email?: string;
   [key: string]: unknown;
@@ -11,7 +12,7 @@ export interface CurrentUser {
 
 interface UsersMeResponse {
   success?: boolean;
-  user: CurrentUser;
+  user: { _id?: string; id?: string; fullName?: string; email?: string; [key: string]: unknown };
 }
 
 export function useCurrentUser() {
@@ -22,7 +23,12 @@ export function useCurrentUser() {
     queryKey: ["currentUser"],
     queryFn: async () => {
       const response = await api.get<UsersMeResponse>("/users/me");
-      return response.data.user;
+      const user = response.data.user;
+      return {
+        ...user,
+        id: user._id ?? user.id ?? "",
+        fullName: user.fullName ?? "",
+      } as CurrentUser;
     },
     enabled: hasToken,
   });

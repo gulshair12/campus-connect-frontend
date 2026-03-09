@@ -60,6 +60,7 @@ export function AdminEventsPage() {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event updated.");
       setEditingEvent(null);
+      setShowForm(false);
     },
     onError: () => {
       toast.error("Failed to update event.");

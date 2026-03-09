@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { eventSchema, type EventFormData } from "@/lib/validations/event";
 import { toDateInputValue } from "@/lib/formatDate";
+import { getFileNameFromUrl } from "@/lib/fileUtils";
 import { uploadEventImage } from "@/services/uploadService";
 import type { Event } from "@/services/eventService";
 
@@ -19,6 +20,9 @@ export interface EventFormProps {
 
 export function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
   const [imageUploading, setImageUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewObjectUrl, setPreviewObjectUrl] = useState<string | null>(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const {
     register,
     handleSubmit,
@@ -40,15 +44,40 @@ export function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
 
   const imageUrl = watch("image");
 
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    };
+  }, [previewObjectUrl]);
+
+  function handleRemoveImage() {
+    if (previewObjectUrl) {
+      URL.revokeObjectURL(previewObjectUrl);
+      setPreviewObjectUrl(null);
+    }
+    setSelectedFile(null);
+    setValue("image", "");
+    setFileInputKey((k) => k + 1);
+  }
+
   async function onImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewObjectUrl(objectUrl);
+    setSelectedFile(file);
     setImageUploading(true);
     try {
       const url = await uploadEventImage(file);
       setValue("image", url);
+      URL.revokeObjectURL(objectUrl);
+      setPreviewObjectUrl(null);
+      setSelectedFile(null);
     } catch (err: unknown) {
       setValue("image", "");
+      URL.revokeObjectURL(objectUrl);
+      setPreviewObjectUrl(null);
+      setSelectedFile(null);
       const message =
         err && typeof err === "object" && "message" in err
           ? String((err as { message?: unknown }).message)
@@ -95,20 +124,64 @@ export function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
       />
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
-          Image <span className="text-red-500">*</span>
+          Upload Image <span className="text-red-500">*</span>
         </label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={onImageChange}
-          disabled={imageUploading}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#3478F6] file:px-4 file:py-2 file:text-white file:hover:bg-[#2a6ad4]"
-        />
-        {imageUploading && (
-          <p className="mt-1 text-sm text-gray-500">Uploading...</p>
-        )}
-        {imageUrl && !errors.image && (
-          <p className="mt-1 text-sm text-green-600">Image uploaded.</p>
+        <p className="mb-2 text-xs text-gray-500">Max file size: 5MB</p>
+        {!imageUrl && !selectedFile ? (
+          <input
+            key={fileInputKey}
+            type="file"
+            accept="image/*"
+            onChange={onImageChange}
+            disabled={imageUploading}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#3478F6] file:px-4 file:py-2 file:text-white file:hover:bg-[#2a6ad4]"
+          />
+        ) : (
+          <div className="relative inline-block">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+              <div className="relative aspect-video w-64 max-w-full">
+                {previewObjectUrl ? (
+                  <img
+                    src={previewObjectUrl}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  disabled={imageUploading}
+                  className="absolute right-2 top-2 rounded-full bg-red-500 p-1.5 text-white shadow-md transition hover:bg-red-600 disabled:opacity-50"
+                  aria-label="Remove image"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="h-4 w-4"
+                  >
+                    <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-2.72 2.72a.75.75 0 101.06 1.06L10 11.06l2.72 2.72a.75.75 0 101.06-1.06L11.06 10l2.72-2.72a.75.75 0 00-1.06-1.06L10 8.94 7.28 6.22z" />
+                  </svg>
+                </button>
+              </div>
+              <p className="truncate px-3 py-2 text-sm text-gray-600">
+                {selectedFile
+                  ? selectedFile.name
+                  : imageUrl
+                    ? getFileNameFromUrl(imageUrl)
+                    : ""}
+              </p>
+            </div>
+            {imageUploading && (
+              <p className="mt-1 text-sm text-gray-500">Uploading...</p>
+            )}
+          </div>
         )}
         {errors.image?.message && (
           <p className="mt-1 text-sm text-red-500">{errors.image.message}</p>
