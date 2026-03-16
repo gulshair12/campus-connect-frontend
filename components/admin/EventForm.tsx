@@ -110,22 +110,23 @@ export function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
           <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>
         )}
       </div>
-      <div className="flex gap-3">
-        <div className="">
-          
+      <div className="grid grid-cols-5 gap-3">
+        <div className="col-span-2">
+          <Input
+            label="Date"
+            type="date"
+            error={errors.date?.message}
+            {...register("date")}
+          />
         </div>
-        <Input
-          label="Date"
-          type="date"
-          error={errors.date?.message}
-          {...register("date")}
-        />
-        <Input
-          label="Location"
-          placeholder="Venue or address"
-          error={errors.location?.message}
-          {...register("location")}
-        />
+        <div className="col-span-3">
+          <Input
+            label="Location"
+            placeholder="Venue or address"
+            error={errors.location?.message}
+            {...register("location")}
+          />
+        </div>
       </div>
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
